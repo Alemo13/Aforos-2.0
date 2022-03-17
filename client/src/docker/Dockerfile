@@ -4,16 +4,19 @@
 FROM node:17-alpine3.14
 
 # Specify the working directory INSIDE the container
-WORKDIR /usr/src/app
+WORKDIR /root/src/app
 
 # Move the package.json and package-lock.json into the container to install dependencies
 COPY package*.json ./
+
+USER node
 
 # Install the dependencies
 RUN npm install
 
 # Copy the source code
-COPY . .
+COPY . ./
 
+EXPOSE 4000
 # Start the node server
 CMD ["npm", "start"]
