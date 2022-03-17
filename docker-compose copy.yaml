@@ -1,0 +1,101 @@
+version: "3.2"
+
+services:
+
+  #Backend
+  client-service:  # aplicacion node del subscriptor
+    container_name: client
+    restart: always
+    networks:
+      - aforos-net
+    image: 'almoz/client-aforo-image'
+    depends_on:
+      - mongo
+      - rabbitmq
+    environment: # variables de entorno
+      - PORT=4000
+      - RABBIT_HOST=rabbitmq
+      - RABBIT_USER=guest 
+      - RABBIT_PASSWORD=guest
+      - MONGO_HOST=mongodb 
+      - SLEEP_TIME=10000
+      - QUEUE=aforo
+    ports: 
+      - '4000:4000' 
+  
+  #Frontend
+  frontend-aforos:  # aplicacion react 
+    container_name: frontend-aforos
+    restart: always
+    networks:
+      - aforos-net
+    image: 'almoz/frontend-aforo-image'
+    depends_on:
+      - client-service
+    ports: 
+      - '3000:4000' 
+  
+  #Simulador del Local
+  sensor-service:  # aplicacion node del publicador
+    container_name: sensor
+    restart: always 
+    networks:
+      - aforos-net
+    image: 'almoz/sensor-aforo-image'
+    depends_on:
+      - rabbitmq
+    environment: # variables de entorno
+      - RABBIT_HOST=rabbitmq
+      - QUEUE=aforo
+      - RABBIT_USER=guest 
+      - RABBIT_PASSWORD=guest
+      - TYPE=Restaurante
+      - NAME=Restaurante_1
+      - SLEEP_TIME=20000
+
+  #Base de Datos
+  mongo: 
+    container_name: mongodb
+    image: mongo:5.0.5
+    networks:
+      - aforos-net
+    volumes:
+      - 'mongodb-vol:/data/configdb'
+    logging: 
+      driver: none # deshabilita el logeo
+    ports:
+      - '27017:27017'
+  
+  mongo-express:
+    container_name: mongo-express
+    restart: always 
+    image: mongo-express
+    networks:
+      - aforos-net
+    ports:
+      - '8081:8081'
+    depends_on:
+      - mongo
+    environment:
+      - ME_CONFIG_MONGODB_URL=mongodb://mongodb:27017/
+  
+  #Protocolo de Mensajeria
+  rabbitmq:
+    container_name: 'rabbitmq'
+    image: rabbitmq:3.9.13-management
+    networks:
+      - aforos-net 
+    environment:
+      - RABBIT_USER=guest 
+      - RABBIT_PASSWORD=guest
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+
+volumes:
+  mongodb-vol:
+    external: false
+
+networks:
+  aforos-net:
+    external: true

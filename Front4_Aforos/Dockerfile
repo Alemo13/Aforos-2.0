@@ -1,13 +1,14 @@
 FROM node:17-alpine3.14
 
 # set working directory
-WORKDIR /app
+WORKDIR /home/node/app
 
 # install app dependencies
 COPY package.json ./
 COPY package-lock.json ./
+
 RUN npm install
-RUN npm install react-scripts@0.1.0 
+RUN npm install react-scripts
 
 # add app
 COPY . ./

@@ -26,6 +26,7 @@ app.set('port', process.env.PORT || 4000);
 //middleware
 app.use(morgan('dev'));
 app.use(bodyParser.json());
+app.use(cors());
 
 //routes
 app.use('/places', placesRoutes);
