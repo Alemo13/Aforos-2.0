@@ -1,44 +1,101 @@
-version: '3'
+version: "3.2"
 
 services:
+
+  #Backend
   client-service:  # aplicacion node del subscriptor
-    restart: always 
-    build: ./cliente 
+    container_name: client
+    restart: always
+    networks:
+      - aforos-net
+    build: ./client
     depends_on:
       - mongo
       - rabbitmq
     environment: # variables de entorno
-      - PORT=3000
-      - MQ_HOST=rabbitmq
-      - MONGO_HOST=mongo 
-      - SLEEP_TIME=20000
+      - PORT=4000
+      - RABBIT_HOST=rabbitmq
+      - RABBIT_USER=guest 
+      - RABBIT_PASSWORD=guest
+      - MONGO_HOST=mongodb 
+      - SLEEP_TIME=10000
+      - QUEUE=aforo
+    ports: 
+      - '4000:4000' 
+  
+  #Frontend
+  frontend-aforos:  # aplicacion react 
+    container_name: frontend-aforos
+    restart: always
+    networks:
+      - aforos-net
+    build: ./frontend
+    depends_on:
+      - client-service
     ports: 
       - '3000:3000' 
   
+  #Simulador del Local
   sensor-service:  # aplicacion node del publicador
+    container_name: sensor
     restart: always 
-    build: ./sensor 
+    networks:
+      - aforos-net
+    build: ./sensor
     depends_on:
-      - mongo
       - rabbitmq
     environment: # variables de entorno
-      - MQ_HOST=rabbitmq
-      - MONGO_HOST=mongo 
+      - RABBIT_HOST=rabbitmq
+      - QUEUE=aforo
+      - RABBIT_USER=guest 
+      - RABBIT_PASSWORD=guest
+      - TYPE=Restaurante
+      - NAME=Restaurante_1
       - SLEEP_TIME=20000
-  
-  mongo: # base de datos
+
+  #Base de Datos
+  mongo: 
+    container_name: mongodb
     image: mongo:5.0.5
+    networks:
+      - aforos-net
+    volumes:
+      - 'mongodb-vol:/data/configdb'
     logging: 
       driver: none # deshabilita el logeo
     ports:
       - '27017:27017'
   
-  rabbitmq: # rabbitmq
-    image: rabbitmq:3 
-    logging: 
-      driver: none 
+  mongo-express:
+    container_name: mongo-express
+    restart: always 
+    image: mongo-express
+    networks:
+      - aforos-net
+    ports:
+      - '8081:8081'
+    depends_on:
+      - mongo
     environment:
-      - RABBIT_HOST=localhost
-      - RABBIT_PORT=5672
+      - ME_CONFIG_MONGODB_URL=mongodb://mongodb:27017/
+  
+  #Protocolo de Mensajeria
+  rabbitmq:
+    container_name: 'rabbitmq'
+    image: rabbitmq:3.9.13-management
+    networks:
+      - aforos-net 
+    environment:
+      - RABBIT_USER=guest 
+      - RABBIT_PASSWORD=guest
     ports:
       - '5672:5672'
+      - '15672:15672'
+
+volumes:
+  mongodb-vol:
+    external: false
+
+networks:
+  aforos-net:
+    external: true

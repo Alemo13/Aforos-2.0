@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbit-config
+  namespace: backends
+data:
+  queue: restaurant
+  tipo: Restaurante
+  nombre: Restaurante_1

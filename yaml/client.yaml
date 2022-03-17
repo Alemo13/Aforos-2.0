@@ -19,13 +19,13 @@ spec:
       - name: backend-client
         image: 
         ports:
-        - containerPort: 3000
+        - containerPort: 4000
         env:
-        - name: MONGODB_HOST
+        - name: SLEEP_TIME
           valueFrom:
             configMapKeyRef:
-              name: mongo-config
-              key: mongo-url
+              name: client-config
+              key: client-sleep
 ---
 apiVersion: v1
 kind: Service
@@ -38,6 +38,6 @@ spec:
     app: client
   ports:
     - protocol: TCP
-      port: 3000
-      targetPort: 3000
-      nodePort: 30100
+      port: 4000
+      targetPort: 4000
+      nodePort: 40100

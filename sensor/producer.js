@@ -2,6 +2,7 @@ const amqp = require("amqplib");
 const queue = process.env.QUEUE || 'restaurant';
 const type = process.env.TYPE || 'Restaurante';
 const name = process.env.NAME || 'Restaurante_1';
+const SLEEP_TIME = process.env.SLEEP_TIME || 100;
 var can = 0;
 const rabbitConfig = {
     protocol: 'amqp',
@@ -56,6 +57,10 @@ publisher()
         console.error(`Error => ${err}`)
     });
 
+setTimeout(() =>{
+    publisher();
+}, SLEEP_TIME);
+
 setInterval(() =>{
     publisher();
-}, 5000);
+}, 10000);

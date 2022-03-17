@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+  namespace: rabbitns
+  labels:
+    app: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3.8
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/rabbitmq
+        ports:
+          - name: http
+            protocol: TCP
+            containerPort: 15672
+          - name: amqp
+            protocol: TCP
+            containerPort: 5672
+        env:
+          - name: RABBIT_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: rabbit-config
+                key: hostname
+          - name: RABBIT_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: rabbit-config
+                key: port
+          - name: RABBIT_USER
+            valueFrom:
+              configMapKeyRef:
+                name: rabbit-config
+                key: username
+          - name: RABBIT_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: rabbit-config
+                key: password
+        volumes:
+        - name: config-volume
+          configMap:
+            name: rabbitmq-config
+            items:
+            - key: rabbitmq.conf
+              path: rabbitmq.conf
+            - key: enabled_plugins
+              path: enabled_plugins
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: rabbitmq-service
+  namespace: rabbitns
+spec:
+  type: NodePort
+  ports:
+   - name: http
+     protocol: TCP
+     port: 15672
+     targetPort: 15672
+     nodePort: 31672
+   - name: amqp
+     protocol: TCP
+     port: 5672
+     targetPort: 5672
+     nodePort: 30672
+  selector:
+    app: rabbitmq

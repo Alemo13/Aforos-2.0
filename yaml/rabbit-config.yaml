@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbit-config
+  namespace: rabbitns
+data:
+  hostname: localhost
+  port: "5672"
+  username: guest
+  password: guest

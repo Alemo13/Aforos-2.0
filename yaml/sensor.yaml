@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-deployment
+  namespace: backends
+  labels:
+    app: sensor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensor
+  template:
+    metadata:
+      labels:
+        app: sensor
+    spec:
+      containers:
+      - name: backend-sensor
+        image: 
+        ports:
+        - containerPort: 5000
+        env:
+        - name: RABBIT_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: rabbit-config.rabbitns
+                key: hostname
+        - name: RABBIT_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: rabbit-config.rabbitns
+              key: port
+        - name: RABBIT_USER
+          valueFrom:
+            configMapKeyRef:
+              name: rabbit-config.rabbitns
+              key: username
+        - name: RABBIT_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: rabbit-config.rabbitns
+              key: password
+        - name: QUEUE
+          valueFrom:
+            configMapKeyRef:
+              name: sensor-config
+              key: queue
+        - name: TYPE
+          valueFrom:
+            configMapKeyRef:
+              name: sensor-config
+              key: tipo
+        - name: NAME
+          valueFrom:
+            configMapKeyRef:
+              name: sensor-config
+              key: nombre
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sensor-service
+  namespace: backends
+spec:
+  type: ClusterIP
+  selector:
+    app: sensor
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000

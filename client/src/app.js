@@ -6,7 +6,6 @@ const app = express();
 const { mongoConnect } = require('./services/database');
 const { amqpConnectAndConsume} = require('./services/mqService');
 const cors = require('cors');
-const SLEEP_TIME = process.env.SLEEP_TIME || 100;
 
 const placesRoutes = require('./routes/places');
 
