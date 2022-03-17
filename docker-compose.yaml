@@ -29,7 +29,7 @@ services:
     restart: always
     networks:
       - aforos-net
-    build: ./frontend
+    build: ./Front4_Aforos
     depends_on:
       - client-service
     ports: 
