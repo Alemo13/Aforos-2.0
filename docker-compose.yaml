@@ -8,7 +8,7 @@ services:
     restart: always
     networks:
       - aforos-net
-    build: ./client
+    image: 'almoz/client-aforo-image:v2'
     depends_on:
       - mongo
       - rabbitmq
@@ -23,25 +23,25 @@ services:
     ports: 
       - '4000:4000' 
   
-  #Frontend
-  frontend-aforos:  # aplicacion react 
-    container_name: frontend-aforos
-    restart: always
-    networks:
-      - aforos-net
-    build: ./Front4_Aforos
-    depends_on:
-      - client-service
-    ports: 
-      - '3000:3000' 
+  # #Frontend
+  # frontend-aforos:  # aplicacion react 
+  #   container_name: frontend-aforos
+  #   restart: always
+  #   networks:
+  #     - aforos-net
+  #   image: 'almoz/front-aforo-image'
+  #   depends_on:
+  #     - client-service
+  #   ports: 
+  #     - '3000:3000' 
   
   #Simulador del Local
-  sensor-service:  # aplicacion node del publicador
-    container_name: sensor
+  sensor-service-rest:  # aplicacion node del publicador
+    container_name: sensor-rest
     restart: always 
     networks:
       - aforos-net
-    build: ./sensor
+    image: 'almoz/sensor-aforo-image'
     depends_on:
       - rabbitmq
     environment: # variables de entorno
@@ -51,7 +51,38 @@ services:
       - RABBIT_PASSWORD=guest
       - TYPE=Restaurante
       - NAME=Restaurante_1
-      - SLEEP_TIME=20000
+ 
+  sensor-service-bar:  # aplicacion node del publicador
+    container_name: sensor-bar
+    restart: always 
+    networks:
+      - aforos-net
+    image: 'almoz/sensor-aforo-image'
+    depends_on:
+      - rabbitmq
+    environment: # variables de entorno
+      - RABBIT_HOST=rabbitmq
+      - QUEUE=aforo
+      - RABBIT_USER=guest 
+      - RABBIT_PASSWORD=guest
+      - TYPE=Bar
+      - NAME=Bar_1
+
+  sensor-service-par:  # aplicacion node del publicador
+    container_name: sensor-par
+    restart: always 
+    networks:
+      - aforos-net
+    image: 'almoz/sensor-aforo-image'
+    depends_on:
+      - rabbitmq
+    environment: # variables de entorno
+      - RABBIT_HOST=rabbitmq
+      - QUEUE=aforo
+      - RABBIT_USER=guest 
+      - RABBIT_PASSWORD=guest
+      - TYPE=Parqueadero
+      - NAME=Parqueadero_1
 
   #Base de Datos
   mongo: 

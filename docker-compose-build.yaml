@@ -8,7 +8,7 @@ services:
     restart: always
     networks:
       - aforos-net
-    image: 'almoz/client-aforo-image'
+    build: ./client
     depends_on:
       - mongo
       - rabbitmq
@@ -29,19 +29,19 @@ services:
     restart: always
     networks:
       - aforos-net
-    image: 'almoz/frontend-aforo-image'
+    build: ./Front4_Aforos
     depends_on:
       - client-service
     ports: 
-      - '3000:4000' 
+      - '3000:3000' 
   
   #Simulador del Local
-  sensor-service:  # aplicacion node del publicador
+  sensor-service-rest:  # aplicacion node del publicador
     container_name: sensor
     restart: always 
     networks:
       - aforos-net
-    image: 'almoz/sensor-aforo-image'
+    build: ./sensor
     depends_on:
       - rabbitmq
     environment: # variables de entorno
@@ -51,7 +51,38 @@ services:
       - RABBIT_PASSWORD=guest
       - TYPE=Restaurante
       - NAME=Restaurante_1
-      - SLEEP_TIME=20000
+ 
+  sensor-service-bar:  # aplicacion node del publicador
+    container_name: sensor
+    restart: always 
+    networks:
+      - aforos-net
+    build: ./sensor
+    depends_on:
+      - rabbitmq
+    environment: # variables de entorno
+      - RABBIT_HOST=rabbitmq
+      - QUEUE=aforo
+      - RABBIT_USER=guest 
+      - RABBIT_PASSWORD=guest
+      - TYPE=Bar
+      - NAME=Bar_1
+
+  sensor-service-par:  # aplicacion node del publicador
+    container_name: sensor
+    restart: always 
+    networks:
+      - aforos-net
+    build: ./sensor
+    depends_on:
+      - rabbitmq
+    environment: # variables de entorno
+      - RABBIT_HOST=rabbitmq
+      - QUEUE=aforo
+      - RABBIT_USER=guest 
+      - RABBIT_PASSWORD=guest
+      - TYPE=Parqueadero
+      - NAME=Parqueadero_1
 
   #Base de Datos
   mongo: 
