@@ -1,7 +1,7 @@
 const amqp = require("amqplib");
 const queue = process.env.QUEUE || 'restaurant';
-const type = process.env.TYPE || 'local';
-const name = process.env.NAME || 'local-Random';
+const type = process.env.TYPE || 'Restaurante';
+const name = process.env.NAME || 'Restaurante_1';
 var can = 0;
 const rabbitConfig = {
     protocol: 'amqp',
